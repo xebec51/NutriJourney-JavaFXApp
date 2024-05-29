@@ -14,6 +14,7 @@ public class App extends Application {
         Database.initialize();
 
         BorderPane root = new BorderPane();
+
         LoginController loginController = new LoginController(primaryStage);
         root.setCenter(loginController.getView());
 
