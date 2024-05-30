@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -16,12 +17,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import nutrijourney.models.User;
 import nutrijourney.models.Food;
-import nutrijourney.models.Fruit;
 import nutrijourney.database.Database;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainController {
 
@@ -30,15 +32,16 @@ public class MainController {
     private Label caloriesTodayLabel, proteinTodayLabel, fatTodayLabel, carbsTodayLabel, waterTodayLabel;
     private Label nameLabel, ageLabel, weightLabel, heightLabel;
     private ListView<Food> recipeListView;
+    private TextField searchField; // Tambahkan TextField untuk pencarian
     private BorderPane mainLayout;
     private Stage primaryStage;
     private User user;
-    private int waterIntake; // Amount of water consumed in ml
+    private int waterIntake; // Jumlah air yang dikonsumsi dalam ml
 
     public MainController(Stage primaryStage, User user) {
         this.primaryStage = primaryStage;
         this.user = user;
-        this.waterIntake = (int) user.getWaterConsumedToday(); // Load the water intake from the user's food log
+        this.waterIntake = (int) user.getWaterConsumedToday(); // Memuat asupan air dari log makanan pengguna
         initializeProfileSection(user);
         initializeWeightUpdateSection();
         initializeWaterIntakeSection();
@@ -52,7 +55,7 @@ public class MainController {
         VBox centerBox = new VBox(0, profileSection, nutritionLogSection);
         VBox rightBox = new VBox(0, recipeSection, new HBox(0, weightUpdateSection, waterIntakeSection), nutritionSection);
 
-        // Ensure sections grow to fill space
+        // Memastikan setiap bagian mengisi ruang yang ada
         VBox.setVgrow(profileSection, Priority.ALWAYS);
         VBox.setVgrow(nutritionLogSection, Priority.ALWAYS);
         VBox.setVgrow(recipeSection, Priority.ALWAYS);
@@ -60,7 +63,7 @@ public class MainController {
         VBox.setVgrow(waterIntakeSection, Priority.ALWAYS);
         VBox.setVgrow(nutritionSection, Priority.ALWAYS);
 
-        // Ensure HBox sections grow to fill space
+        // Memastikan HBox sections mengisi ruang yang ada
         HBox.setHgrow(weightUpdateSection, Priority.ALWAYS);
         HBox.setHgrow(waterIntakeSection, Priority.ALWAYS);
 
@@ -195,13 +198,11 @@ public class MainController {
         recipeSection.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-border-insets: 0; -fx-border-style: solid;");
         recipeSection.getChildren().add(new Label("Recipes"));
 
-        recipeListView = new ListView<>();
-        recipeListView.getItems().addAll(
-                new Fruit("Apple", 52, 0.3, 0.2, 14),
-                new Fruit("Banana", 89, 1.1, 0.3, 23),
-                new Fruit("Orange", 43, 1.0, 0.2, 10)
-        );
+        searchField = new TextField();
+        searchField.setPromptText("Search recipes...");
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> filterRecipes(newValue));
 
+        recipeListView = new ListView<>();
         recipeListView.setCellFactory(param -> new ListCell<Food>() {
             @Override
             protected void updateItem(Food item, boolean empty) {
@@ -214,15 +215,36 @@ public class MainController {
             }
         });
 
-        recipeListView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                Food selectedFood = recipeListView.getSelectionModel().getSelectedItem();
-                if (selectedFood != null) {
-                    logSelectedFood(selectedFood);
-                }
+        recipeListView.setOnMouseClicked(this::handleRecipeClick);
+
+        loadRecipes();
+
+        recipeSection.getChildren().addAll(searchField, recipeListView);
+    }
+
+    private void loadRecipes() {
+        List<Food> recipes = Database.getAllFoods();
+        recipeListView.getItems().setAll(recipes);
+    }
+
+    private void filterRecipes(String keyword) {
+        if (keyword == null || keyword.isEmpty()) {
+            loadRecipes();
+        } else {
+            List<Food> filteredRecipes = Database.getAllFoods().stream()
+                .filter(food -> food.getName().toLowerCase().contains(keyword.toLowerCase()))
+                .collect(Collectors.toList());
+            recipeListView.getItems().setAll(filteredRecipes);
+        }
+    }
+
+    private void handleRecipeClick(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            Food selectedFood = recipeListView.getSelectionModel().getSelectedItem();
+            if (selectedFood != null) {
+                logSelectedFood(selectedFood);
             }
-        });
-        recipeSection.getChildren().add(recipeListView);
+        }
     }
 
     private void logSelectedFood(Food selectedFood) {

@@ -4,11 +4,20 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import nutrijourney.models.Food;
 import nutrijourney.models.User;
+import nutrijourney.database.Database;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class NutritionDetailController {
 
@@ -22,7 +31,7 @@ public class NutritionDetailController {
 
         initializeNutritionLayout();
 
-        Scene scene = new Scene(nutritionLayout, 400, 300);
+        Scene scene = new Scene(new ScrollPane(nutritionLayout), 800, 600); // Ukuran scene sama dengan Main scene
         stage.setTitle("Nutrition Details");
         stage.setScene(scene);
     }
@@ -30,12 +39,12 @@ public class NutritionDetailController {
     private void initializeNutritionLayout() {
         nutritionLayout = new VBox(10);
         nutritionLayout.setPadding(new Insets(10));
-        
+
         updateNutritionDetails();
 
         Button backButton = new Button("Back to Main Menu");
         backButton.setOnAction(e -> showMainMenu());
-        
+
         VBox.setVgrow(nutritionLayout, Priority.ALWAYS);
         nutritionLayout.getChildren().add(backButton);
     }
@@ -49,21 +58,42 @@ public class NutritionDetailController {
         Label totalCarbsLabel = new Label("Total Carbs: " + user.getTotalCarbs() + " g");
         Label totalWaterLabel = new Label("Total Water: " + user.getWaterConsumedToday() + " ml");
 
-        VBox foodLogLayout = new VBox(5);
-        foodLogLayout.getChildren().add(new Label("Food Log:"));
-        for (Food food : user.getFoodLog()) {
-            Label foodLabel = new Label(food.getName() + ": " + food.getCalories() + " kcal - " + food.getDate() + " " + food.getDay());
-            if (food.getName().equals("Water")) {
-                foodLabel = new Label(food.getName() + ": " + food.getWater() + " ml - " + food.getDate() + " " + food.getDay());
-            }
-            foodLogLayout.getChildren().add(foodLabel);
-        }
+        nutritionLayout.getChildren().addAll(totalCaloriesLabel, totalProteinLabel, totalFatLabel, totalCarbsLabel, totalWaterLabel);
 
-        nutritionLayout.getChildren().addAll(totalCaloriesLabel, totalProteinLabel, totalFatLabel, totalCarbsLabel, totalWaterLabel, foodLogLayout);
+        List<Food> allFoods = Database.getAllLoggedFoods(user.getUsername());
+
+        // Create titled panes for each day
+        Map<String, List<Food>> foodsByDay = allFoods.stream()
+                .collect(Collectors.groupingBy(Food::getDate));
+
+        foodsByDay.forEach((date, foods) -> {
+            TitledPane dayPane = createDayPane(date, foods);
+            nutritionLayout.getChildren().add(dayPane);
+        });
 
         Button backButton = new Button("Back to Main Menu");
         backButton.setOnAction(e -> showMainMenu());
         nutritionLayout.getChildren().add(backButton);
+    }
+
+    private TitledPane createDayPane(String date, List<Food> foods) {
+        ListView<Food> dayListView = new ListView<>();
+        dayListView.setCellFactory(param -> new ListCell<Food>() {
+            @Override
+            protected void updateItem(Food item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getName() + " - " + item.getCalories() + " kcal");
+                }
+            }
+        });
+        dayListView.getItems().setAll(foods);
+
+        TitledPane dayPane = new TitledPane(date, dayListView);
+        dayPane.setCollapsible(true);
+        return dayPane;
     }
 
     private void showMainMenu() {
