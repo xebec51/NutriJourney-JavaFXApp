@@ -2,7 +2,7 @@ package nutrijourney.controllers;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-// import javafx.scene.Scene;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -78,6 +78,9 @@ public class LoginController {
 
         stackPane.getChildren().addAll(frameImage, view);
         StackPane.setAlignment(view, Pos.CENTER);
+
+        Scene loginScene = new Scene(stackPane, 800, 600);
+        primaryStage.setScene(loginScene);
     }
 
     private void handleLogin(Stage primaryStage) {

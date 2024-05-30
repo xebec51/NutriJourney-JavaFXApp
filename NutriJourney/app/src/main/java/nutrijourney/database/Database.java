@@ -46,6 +46,7 @@ public class Database {
                              "protein REAL, " +
                              "fat REAL, " +
                              "carbs REAL, " +
+                             "water REAL, " + // Tambahkan kolom untuk jumlah air
                              "consumption_date TEXT, " +
                              "consumption_day TEXT, " +
                              "FOREIGN KEY (username) REFERENCES users(username))";
@@ -136,15 +137,29 @@ public class Database {
         if (username == null || username.isEmpty() || food == null) {
             throw new IllegalArgumentException("Username and food cannot be null or empty");
         }
-        try (PreparedStatement pstmt = getConnection().prepareStatement("INSERT INTO food_log (username, food_name, calories, protein, fat, carbs, consumption_date, consumption_day) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
+        try (PreparedStatement pstmt = getConnection().prepareStatement("INSERT INTO food_log (username, food_name, calories, protein, fat, carbs, water, consumption_date, consumption_day) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             pstmt.setString(1, username);
             pstmt.setString(2, food.getName());
             pstmt.setDouble(3, food.getCalories());
             pstmt.setDouble(4, food.getProtein());
             pstmt.setDouble(5, food.getFat());
             pstmt.setDouble(6, food.getCarbs());
-            pstmt.setString(7, date);
-            pstmt.setString(8, day);
+            pstmt.setDouble(7, food.getWater()); // Menyimpan jumlah air
+            pstmt.setString(8, date);
+            pstmt.setString(9, day);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static synchronized void updateUserWeight(String username, double newWeight) {
+        if (username == null || username.isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+        try (PreparedStatement pstmt = getConnection().prepareStatement("UPDATE users SET weight = ? WHERE username = ?")) {
+            pstmt.setDouble(1, newWeight);
+            pstmt.setString(2, username);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -165,7 +180,8 @@ public class Database {
                     rs.getDouble("calories"),
                     rs.getDouble("protein"),
                     rs.getDouble("fat"),
-                    rs.getDouble("carbs")
+                    rs.getDouble("carbs"),
+                    rs.getDouble("water") // Menambahkan jumlah air
                 ) {
                     @Override
                     public void displayInfo() {

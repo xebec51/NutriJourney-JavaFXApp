@@ -6,6 +6,7 @@ public abstract class Food { // Abstraksi
     private double protein;
     private double fat;
     private double carbs;
+    private double water; // Jumlah air dalam ml
     private String date;
     private String day;
 
@@ -15,6 +16,16 @@ public abstract class Food { // Abstraksi
         this.protein = protein;
         this.fat = fat;
         this.carbs = carbs;
+        this.water = 0;
+    }
+
+    public Food(String name, double calories, double protein, double fat, double carbs, double water) {
+        this.name = name;
+        this.calories = calories;
+        this.protein = protein;
+        this.fat = fat;
+        this.carbs = carbs;
+        this.water = water;
     }
 
     public String getName() {
@@ -35,6 +46,14 @@ public abstract class Food { // Abstraksi
 
     public double getCarbs() {
         return carbs;
+    }
+
+    public double getWater() {
+        return water;
+    }
+
+    public void setWater(double water) {
+        this.water = water;
     }
 
     public String getDate() {

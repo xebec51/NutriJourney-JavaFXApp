@@ -4,12 +4,14 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import nutrijourney.models.Food;
 import nutrijourney.models.User;
 
 public class NutritionDetailController {
+
     private Stage stage;
     private User user;
     private VBox nutritionLayout;
@@ -28,23 +30,40 @@ public class NutritionDetailController {
     private void initializeNutritionLayout() {
         nutritionLayout = new VBox(10);
         nutritionLayout.setPadding(new Insets(10));
+        
+        updateNutritionDetails();
+
+        Button backButton = new Button("Back to Main Menu");
+        backButton.setOnAction(e -> showMainMenu());
+        
+        VBox.setVgrow(nutritionLayout, Priority.ALWAYS);
+        nutritionLayout.getChildren().add(backButton);
+    }
+
+    public void updateNutritionDetails() {
+        nutritionLayout.getChildren().clear();
 
         Label totalCaloriesLabel = new Label("Total Calories: " + user.getTotalCalories());
         Label totalProteinLabel = new Label("Total Protein: " + user.getTotalProtein() + " g");
         Label totalFatLabel = new Label("Total Fat: " + user.getTotalFat() + " g");
         Label totalCarbsLabel = new Label("Total Carbs: " + user.getTotalCarbs() + " g");
+        Label totalWaterLabel = new Label("Total Water: " + user.getWaterConsumedToday() + " ml");
 
         VBox foodLogLayout = new VBox(5);
         foodLogLayout.getChildren().add(new Label("Food Log:"));
         for (Food food : user.getFoodLog()) {
-            Label foodLabel = new Label(food.getName() + ": " + food.getCalories() + " kcal - " + food.getDate() + " (" + food.getDay() + ")");
+            Label foodLabel = new Label(food.getName() + ": " + food.getCalories() + " kcal - " + food.getDate() + " " + food.getDay());
+            if (food.getName().equals("Water")) {
+                foodLabel = new Label(food.getName() + ": " + food.getWater() + " ml - " + food.getDate() + " " + food.getDay());
+            }
             foodLogLayout.getChildren().add(foodLabel);
         }
 
+        nutritionLayout.getChildren().addAll(totalCaloriesLabel, totalProteinLabel, totalFatLabel, totalCarbsLabel, totalWaterLabel, foodLogLayout);
+
         Button backButton = new Button("Back to Main Menu");
         backButton.setOnAction(e -> showMainMenu());
-
-        nutritionLayout.getChildren().addAll(totalCaloriesLabel, totalProteinLabel, totalFatLabel, totalCarbsLabel, foodLogLayout, backButton);
+        nutritionLayout.getChildren().add(backButton);
     }
 
     private void showMainMenu() {
