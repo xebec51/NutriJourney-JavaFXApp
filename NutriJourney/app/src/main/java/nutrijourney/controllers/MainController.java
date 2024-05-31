@@ -290,7 +290,6 @@ public class MainController {
         Button viewNutritionButton = new Button("View Nutrition Details");
         viewNutritionButton.setOnAction(e -> {
             NutritionDetailController nutritionDetailController = new NutritionDetailController(primaryStage, user);
-            nutritionDetailController.updateNutritionDetails(); // Ensure data is updated before showing
             nutritionDetailController.show();
         });
 
