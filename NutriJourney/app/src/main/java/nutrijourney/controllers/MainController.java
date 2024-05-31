@@ -136,21 +136,21 @@ public class MainController {
         nutritionLogSection.getChildren().add(new Label("Daily Nutrition Log"));
 
         // Initialize labels for today's nutrient intake
-        caloriesTodayLabel = new Label("Calories consumed today: " + user.getCaloriesConsumedToday() + " kcal");
-        proteinTodayLabel = new Label("Protein consumed today: " + user.getProteinConsumedToday() + " g");
-        fatTodayLabel = new Label("Fat consumed today: " + user.getFatConsumedToday() + " g");
-        carbsTodayLabel = new Label("Carbs consumed today: " + user.getCarbsConsumedToday() + " g");
-        waterTodayLabel = new Label("Water consumed today: " + user.getWaterConsumedToday() + " ml");
+        caloriesTodayLabel = new Label("Calories consumed today: " + String.format("%.1f", user.getCaloriesConsumedToday()) + " kcal");
+        proteinTodayLabel = new Label("Protein consumed today: " + String.format("%.1f", user.getProteinConsumedToday()) + " g");
+        fatTodayLabel = new Label("Fat consumed today: " + String.format("%.1f", user.getFatConsumedToday()) + " g");
+        carbsTodayLabel = new Label("Carbs consumed today: " + String.format("%.1f", user.getCarbsConsumedToday()) + " g");
+        waterTodayLabel = new Label("Water consumed today: " + String.format("%.1f", user.getWaterConsumedToday()) + " ml");
 
         nutritionLogSection.getChildren().addAll(caloriesTodayLabel, proteinTodayLabel, fatTodayLabel, carbsTodayLabel, waterTodayLabel);
     }
 
     private void updateTodayNutrients() {
-        caloriesTodayLabel.setText("Calories consumed today: " + user.getCaloriesConsumedToday() + " kcal");
-        proteinTodayLabel.setText("Protein consumed today: " + user.getProteinConsumedToday() + " g");
-        fatTodayLabel.setText("Fat consumed today: " + user.getFatConsumedToday() + " g");
-        carbsTodayLabel.setText("Carbs consumed today: " + user.getCarbsConsumedToday() + " g");
-        waterTodayLabel.setText("Water consumed today: " + user.getWaterConsumedToday() + " ml");
+        caloriesTodayLabel.setText("Calories consumed today: " + String.format("%.1f", user.getCaloriesConsumedToday()) + " kcal");
+        proteinTodayLabel.setText("Protein consumed today: " + String.format("%.1f", user.getProteinConsumedToday()) + " g");
+        fatTodayLabel.setText("Fat consumed today: " + String.format("%.1f", user.getFatConsumedToday()) + " g");
+        carbsTodayLabel.setText("Carbs consumed today: " + String.format("%.1f", user.getCarbsConsumedToday()) + " g");
+        waterTodayLabel.setText("Water consumed today: " + String.format("%.1f", user.getWaterConsumedToday()) + " ml");
     }
 
     private void initializeWeightUpdateSection() {
