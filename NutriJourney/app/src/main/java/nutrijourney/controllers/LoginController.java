@@ -95,7 +95,8 @@ public class LoginController {
         User user = Database.getUser(username);
         if (user != null && user.getPassword().equals(password)) {
             MainController mainController = new MainController(primaryStage, user);
-            primaryStage.getScene().setRoot(mainController.getView());
+            Scene mainScene = new Scene(new VBox(mainController.createHeader(), mainController.getView()), 800, 600); // Menggunakan VBox untuk mempertahankan header
+            primaryStage.setScene(mainScene);
         } else {
             showAlert("Login Failed", "Invalid username or password.");
         }

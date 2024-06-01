@@ -2,17 +2,8 @@ package nutrijourney.controllers;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TitledPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import nutrijourney.models.Food;
 import nutrijourney.models.User;
@@ -39,10 +30,6 @@ public class NutritionDetailController {
         loadFoodsByDay();
         createMenuBar();
         initializeNutritionLayout();
-
-        Scene scene = new Scene(new VBox(menuBar, mainLayout), 800, 600); // Ukuran scene
-        stage.setTitle("Nutrition Details");
-        stage.setScene(scene);
     }
 
     private void initializeNutritionLayout() {
@@ -170,10 +157,15 @@ public class NutritionDetailController {
 
     private void showMainMenu() {
         MainController mainController = new MainController(stage, user);
-        stage.getScene().setRoot(mainController.getView());
+        Scene mainScene = new Scene(new VBox(mainController.createHeader(), mainController.getView()), 800, 600); // Membuat root baru setiap kali
+        stage.setScene(mainScene);
+    }
+
+    public Scene getScene() {
+        return new Scene(new VBox(menuBar, mainLayout), 800, 600);
     }
 
     public void show() {
-        stage.show();
+        stage.setScene(getScene());
     }
 }
