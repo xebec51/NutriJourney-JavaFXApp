@@ -2,18 +2,11 @@ package nutrijourney.controllers;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import nutrijourney.models.User;
 import nutrijourney.models.Food;
@@ -32,16 +25,16 @@ public class MainController {
     private Label caloriesTodayLabel, proteinTodayLabel, fatTodayLabel, carbsTodayLabel, waterTodayLabel;
     private Label nameLabel, ageLabel, weightLabel, heightLabel;
     private ListView<Food> recipeListView;
-    private TextField searchField; // Tambahkan TextField untuk pencarian
+    private TextField searchField;
     private BorderPane mainLayout;
     private Stage primaryStage;
     private User user;
-    private int waterIntake; // Jumlah air yang dikonsumsi dalam ml
+    private int waterIntake;
 
     public MainController(Stage primaryStage, User user) {
         this.primaryStage = primaryStage;
         this.user = user;
-        this.waterIntake = (int) user.getWaterConsumedToday(); // Memuat asupan air dari log makanan pengguna
+        this.waterIntake = (int) user.getWaterConsumedToday();
         initializeProfileSection(user);
         initializeWeightUpdateSection();
         initializeWaterIntakeSection();
@@ -50,12 +43,11 @@ public class MainController {
         initializeNutritionSection();
 
         mainLayout = new BorderPane();
-        mainLayout.setPadding(new Insets(10)); // Menambahkan padding di setiap sisi scene
+        mainLayout.setPadding(new Insets(0)); // Mengatur padding menjadi 0
 
         VBox centerBox = new VBox(0, profileSection, nutritionLogSection);
         VBox rightBox = new VBox(0, recipeSection, new HBox(0, weightUpdateSection, waterIntakeSection), nutritionSection);
 
-        // Memastikan setiap bagian mengisi ruang yang ada
         VBox.setVgrow(profileSection, Priority.ALWAYS);
         VBox.setVgrow(nutritionLogSection, Priority.ALWAYS);
         VBox.setVgrow(recipeSection, Priority.ALWAYS);
@@ -63,21 +55,39 @@ public class MainController {
         VBox.setVgrow(waterIntakeSection, Priority.ALWAYS);
         VBox.setVgrow(nutritionSection, Priority.ALWAYS);
 
-        // Memastikan HBox sections mengisi ruang yang ada
         HBox.setHgrow(weightUpdateSection, Priority.ALWAYS);
         HBox.setHgrow(waterIntakeSection, Priority.ALWAYS);
 
         mainLayout.setLeft(centerBox);
         mainLayout.setCenter(rightBox);
 
-        Scene scene = new Scene(mainLayout, 800, 600);
-        primaryStage.setScene(scene);
+        // Header akan ditambahkan di LoginController atau NutritionDetailController untuk memastikan tidak hilang
+    }
+
+    public HBox createHeader() {
+        HBox header = new HBox();
+        header.setPadding(new Insets(0));
+        header.setSpacing(0);
+
+        ImageView headerImage = new ImageView(new Image(getClass().getResource("/images/header.png").toExternalForm()));
+        headerImage.setFitHeight(110);
+        headerImage.setPreserveRatio(true);
+
+        HBox.setHgrow(headerImage, Priority.ALWAYS);
+        header.getChildren().add(headerImage);
+
+        return header;
+    }
+
+    private void logout() {
+        LoginController loginController = new LoginController(primaryStage);
+        primaryStage.getScene().setRoot(loginController.getView());
     }
 
     private void initializeProfileSection(User user) {
         profileSection = new VBox(10);
         profileSection.setPadding(new Insets(10));
-        profileSection.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-border-insets: 0; -fx-border-style: solid;");
+        profileSection.setStyle("-fx-border-color: lightgray; -fx-border-width: 1; -fx-border-style: solid;");
         profileSection.getChildren().add(new Label("User Profile"));
 
         nameLabel = new Label("Full Name: " + user.getFullName());
@@ -98,20 +108,19 @@ public class MainController {
     private void initializeWaterIntakeSection() {
         waterIntakeSection = new VBox(10);
         waterIntakeSection.setPadding(new Insets(10));
-        waterIntakeSection.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-border-insets: 0; -fx-border-style: solid;");
+        waterIntakeSection.setStyle("-fx-border-color: lightgray; -fx-border-width: 1; -fx-border-style: solid;");
         waterIntakeSection.getChildren().add(new Label("Water Intake"));
 
         waterIntakeLabel = new Label("Water Intake: " + waterIntake + " ml");
         Button addWaterButton = new Button("Add 250 ml");
+        addWaterButton.setStyle("-fx-background-color: #006400; -fx-text-fill: #ffffff;");
         addWaterButton.setOnAction(e -> {
             waterIntake += 250;
             waterIntakeLabel.setText("Water Intake: " + waterIntake + " ml");
 
-            // Log water intake
             Food water = new Food("Water", 0, 0, 0, 0, 250) {
                 @Override
                 public void displayInfo() {
-                    // No implementation needed for this example
                 }
             };
             LocalDate today = LocalDate.now();
@@ -121,7 +130,6 @@ public class MainController {
             water.setDay(time);
             Database.logFood(user.getUsername(), water, date, time);
 
-            // Update the user's food log without showing the Nutrition Details view
             user.logFood(water, date, time);
             updateTodayNutrients();
         });
@@ -132,10 +140,9 @@ public class MainController {
     private void initializeNutritionLogSection() {
         nutritionLogSection = new VBox(10);
         nutritionLogSection.setPadding(new Insets(10));
-        nutritionLogSection.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-border-insets: 0; -fx-border-style: solid;");
+        nutritionLogSection.setStyle("-fx-border-color: lightgray; -fx-border-width: 1; -fx-border-style: solid;");
         nutritionLogSection.getChildren().add(new Label("Daily Nutrition Log"));
 
-        // Initialize labels for today's nutrient intake
         caloriesTodayLabel = new Label("Calories consumed today: " + String.format("%.1f", user.getCaloriesConsumedToday()) + " kcal");
         proteinTodayLabel = new Label("Protein consumed today: " + String.format("%.1f", user.getProteinConsumedToday()) + " g");
         fatTodayLabel = new Label("Fat consumed today: " + String.format("%.1f", user.getFatConsumedToday()) + " g");
@@ -156,27 +163,25 @@ public class MainController {
     private void initializeWeightUpdateSection() {
         weightUpdateSection = new VBox(10);
         weightUpdateSection.setPadding(new Insets(10));
-        weightUpdateSection.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-border-insets: 0; -fx-border-style: solid;");
+        weightUpdateSection.setStyle("-fx-border-color: lightgray; -fx-border-width: 1; -fx-border-style: solid;");
         weightUpdateSection.getChildren().add(new Label("Update Weight"));
 
         TextField weightField = new TextField();
         weightField.setPromptText("Enter new weight (kg)");
 
         Button updateWeightButton = new Button("Update Weight");
+        updateWeightButton.setStyle("-fx-background-color: #006400; -fx-text-fill: #ffffff;");
         updateWeightButton.setOnAction(e -> {
             try {
                 double newWeight = Double.parseDouble(weightField.getText());
                 user.setWeight(newWeight);
 
-                // Update weight in the database
                 Database.updateUserWeight(user.getUsername(), newWeight);
 
-                // Update the profile section with the new weight and BMI
                 weightLabel.setText("Weight: " + user.getWeight() + " kg");
                 bmiLabel.setText("BMI: " + String.format("%.2f", user.calculateBMI()));
                 bmiCategoryLabel.setText("BMI Category: " + user.getBMICategory());
 
-                // Update daily nutrition needs
                 dailyCaloriesLabel.setText("Daily Caloric Needs: " + String.format("%.0f", user.calculateDailyCalories()) + " kcal");
                 dailyCarbsLabel.setText("Daily Carbs: " + String.format("%.0f", user.getDailyCarbs()) + " g");
                 dailyProteinLabel.setText("Daily Protein: " + String.format("%.0f", user.getDailyProtein()) + " g");
@@ -195,7 +200,7 @@ public class MainController {
     private void initializeRecipeSection() {
         recipeSection = new VBox(10);
         recipeSection.setPadding(new Insets(10));
-        recipeSection.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-border-insets: 0; -fx-border-style: solid;");
+        recipeSection.setStyle("-fx-border-color: lightgray; -fx-border-width: 1; -fx-border-style: solid;");
         recipeSection.getChildren().add(new Label("Recipes"));
 
         searchField = new TextField();
@@ -215,7 +220,7 @@ public class MainController {
             }
         });
 
-        recipeListView.setOnMouseClicked(this::handleRecipeClick);
+        recipeListView.setOnMouseClicked(event -> handleRecipeClick(event));
 
         loadRecipes();
 
@@ -259,6 +264,7 @@ public class MainController {
         Label carbsLabel = new Label("Carbs: " + selectedFood.getCarbs());
 
         Button logButton = new Button("Log This Food");
+        logButton.setStyle("-fx-background-color: #006400; -fx-text-fill: #ffffff;");
         logButton.setOnAction(e -> {
             LocalDate today = LocalDate.now();
             String date = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -267,7 +273,6 @@ public class MainController {
             selectedFood.setDay(time);
             Database.logFood(user.getUsername(), selectedFood, date, time);
 
-            // Update the user's food log
             user.logFood(selectedFood, date, time);
             updateTodayNutrients();
             logStage.close();
@@ -284,28 +289,28 @@ public class MainController {
     private void initializeNutritionSection() {
         nutritionSection = new VBox(10);
         nutritionSection.setPadding(new Insets(10));
-        nutritionSection.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-border-insets: 0; -fx-border-style: solid;");
+        nutritionSection.setStyle("-fx-border-color: lightgray; -fx-border-width: 1; -fx-border-style: solid;");
         nutritionSection.getChildren().add(new Label("Nutrition Details"));
 
         Button viewNutritionButton = new Button("View Nutrition Details");
+        viewNutritionButton.setStyle("-fx-background-color: #006400; -fx-text-fill: #ffffff;");
         viewNutritionButton.setOnAction(e -> {
             NutritionDetailController nutritionDetailController = new NutritionDetailController(primaryStage, user);
-            nutritionDetailController.show();
+            Scene nutritionScene = nutritionDetailController.getScene();
+            VBox root = new VBox(createHeader(), nutritionScene.getRoot()); // Tambahkan header di sini
+            nutritionScene.setRoot(root);
+            primaryStage.setScene(nutritionScene);
         });
 
         Button logoutButton = new Button("Logout");
+        logoutButton.setStyle("-fx-background-color: #006400; -fx-text-fill: #ffffff;");
         logoutButton.setOnAction(e -> logout());
 
         nutritionSection.getChildren().addAll(viewNutritionButton, logoutButton);
     }
 
-    private void logout() {
-        LoginController loginController = new LoginController(primaryStage);
-        primaryStage.getScene().setRoot(loginController.getView());
-    }
-
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(AlertType.INFORMATION);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
