@@ -1,12 +1,13 @@
+// Food.java
 package nutrijourney.models;
 
-public abstract class Food { // Abstraksi
-    private String name; // Enkapsulasi
+public abstract class Food {
+    private String name;
     private double calories;
     private double protein;
     private double fat;
     private double carbs;
-    private double water; // Jumlah air dalam ml
+    private double water;
     private String date;
     private String day;
 
@@ -32,20 +33,40 @@ public abstract class Food { // Abstraksi
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public double getCalories() {
         return calories;
+    }
+
+    public void setCalories(double calories) {
+        this.calories = calories;
     }
 
     public double getProtein() {
         return protein;
     }
 
+    public void setProtein(double protein) {
+        this.protein = protein;
+    }
+
     public double getFat() {
         return fat;
     }
 
+    public void setFat(double fat) {
+        this.fat = fat;
+    }
+
     public double getCarbs() {
         return carbs;
+    }
+
+    public void setCarbs(double carbs) {
+        this.carbs = carbs;
     }
 
     public double getWater() {
@@ -72,5 +93,5 @@ public abstract class Food { // Abstraksi
         this.day = day;
     }
 
-    public abstract void displayInfo(); // Polimorfisme
+    public abstract void displayInfo();
 }

@@ -202,6 +202,7 @@ public class RegisterController {
                 checkStmt.setString(1, username);
                 ResultSet rs = checkStmt.executeQuery();
                 if (rs.next() && rs.getInt(1) > 0) {
+                    System.out.println("Username already exists: " + username); // Debug output
                     messageLabel.setText("Username already exists. Please choose a different username.");
                     return;
                 }
@@ -219,6 +220,7 @@ public class RegisterController {
                 pstmt.setString(7, gender);
                 pstmt.setDouble(8, activityLevel);
                 pstmt.executeUpdate();
+                System.out.println("User registered: " + username); // Debug output
             }
 
             // Show success alert

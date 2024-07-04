@@ -60,8 +60,6 @@ public class MainController {
 
         mainLayout.setLeft(centerBox);
         mainLayout.setCenter(rightBox);
-
-        // Header akan ditambahkan di LoginController atau NutritionDetailController untuk memastikan tidak hilang
     }
 
     public HBox createHeader() {
@@ -208,6 +206,7 @@ public class MainController {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterRecipes(newValue));
 
         recipeListView = new ListView<>();
+        recipeListView.setMaxHeight(200); // Membatasi tinggi list view agar tidak terlalu besar
         recipeListView.setCellFactory(param -> new ListCell<Food>() {
             @Override
             protected void updateItem(Food item, boolean empty) {
@@ -247,43 +246,75 @@ public class MainController {
         if (event.getClickCount() == 2) {
             Food selectedFood = recipeListView.getSelectionModel().getSelectedItem();
             if (selectedFood != null) {
-                logSelectedFood(selectedFood);
+                showFoodDetails(selectedFood);
             }
         }
     }
 
-    private void logSelectedFood(Food selectedFood) {
-        Stage logStage = new Stage();
-        VBox logLayout = new VBox(10);
-        logLayout.setPadding(new Insets(10));
+    private void showFoodDetails(Food food) {
+        Stage detailStage = new Stage();
+        VBox detailLayout = new VBox(10);
+        detailLayout.setPadding(new Insets(10));
 
-        Label foodNameLabel = new Label("Food: " + selectedFood.getName());
-        Label caloriesLabel = new Label("Calories: " + selectedFood.getCalories());
-        Label proteinLabel = new Label("Protein: " + selectedFood.getProtein());
-        Label fatLabel = new Label("Fat: " + selectedFood.getFat());
-        Label carbsLabel = new Label("Carbs: " + selectedFood.getCarbs());
+        Label foodNameLabel = new Label("Food: " + food.getName());
+        Label caloriesLabel = new Label("Calories: " + food.getCalories());
+        Label proteinLabel = new Label("Protein: " + food.getProtein());
+        Label fatLabel = new Label("Fat: " + food.getFat());
+        Label carbsLabel = new Label("Carbs: " + food.getCarbs());
 
-        Button logButton = new Button("Log This Food");
-        logButton.setStyle("-fx-background-color: #006400; -fx-text-fill: #ffffff;");
-        logButton.setOnAction(e -> {
-            LocalDate today = LocalDate.now();
-            String date = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-            selectedFood.setDate(date);
-            selectedFood.setDay(time);
-            Database.logFood(user.getUsername(), selectedFood, date, time);
+        Button editButton = new Button("Edit");
+        editButton.setStyle("-fx-background-color: #006400; -fx-text-fill: #ffffff;");
+        editButton.setOnAction(e -> showEditFoodForm(food, detailStage));
 
-            user.logFood(selectedFood, date, time);
+        Button deleteButton = new Button("Delete");
+        deleteButton.setStyle("-fx-background-color: #8B0000; -fx-text-fill: #ffffff;");
+        deleteButton.setOnAction(e -> {
+            Database.deleteFoodLog(user.getUsername(), food.getName(), food.getDate(), food.getDay());
+            user.getFoodLog().remove(food);
             updateTodayNutrients();
-            logStage.close();
+            detailStage.close();
         });
 
-        logLayout.getChildren().addAll(foodNameLabel, caloriesLabel, proteinLabel, fatLabel, carbsLabel, logButton);
+        detailLayout.getChildren().addAll(foodNameLabel, caloriesLabel, proteinLabel, fatLabel, carbsLabel, editButton, deleteButton);
 
-        Scene logScene = new Scene(logLayout, 300, 200);
-        logStage.setScene(logScene);
-        logStage.setTitle("Log Food");
-        logStage.show();
+        Scene detailScene = new Scene(detailLayout, 300, 200);
+        detailStage.setScene(detailScene);
+        detailStage.setTitle("Food Details");
+        detailStage.show();
+    }
+
+    private void showEditFoodForm(Food food, Stage detailStage) {
+        Stage editStage = new Stage();
+        VBox editLayout = new VBox(10);
+        editLayout.setPadding(new Insets(10));
+
+        TextField foodNameField = new TextField(food.getName());
+        TextField caloriesField = new TextField(Double.toString(food.getCalories()));
+        TextField proteinField = new TextField(Double.toString(food.getProtein()));
+        TextField fatField = new TextField(Double.toString(food.getFat()));
+        TextField carbsField = new TextField(Double.toString(food.getCarbs()));
+
+        Button saveButton = new Button("Save");
+        saveButton.setStyle("-fx-background-color: #006400; -fx-text-fill: #ffffff;");
+        saveButton.setOnAction(e -> {
+            food.setName(foodNameField.getText());
+            food.setCalories(Double.parseDouble(caloriesField.getText()));
+            food.setProtein(Double.parseDouble(proteinField.getText()));
+            food.setFat(Double.parseDouble(fatField.getText()));
+            food.setCarbs(Double.parseDouble(carbsField.getText()));
+
+            Database.updateFoodLog(user.getUsername(), food, food.getDate(), food.getDay());
+            updateTodayNutrients();
+            editStage.close();
+            detailStage.close();
+        });
+
+        editLayout.getChildren().addAll(new Label("Edit Food"), foodNameField, caloriesField, proteinField, fatField, carbsField, saveButton);
+
+        Scene editScene = new Scene(editLayout, 300, 250);
+        editStage.setScene(editScene);
+        editStage.setTitle("Edit Food");
+        editStage.show();
     }
 
     private void initializeNutritionSection() {

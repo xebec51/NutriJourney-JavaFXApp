@@ -11,6 +11,9 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+
+        primaryStage.setResizable(false);
+
         Database.initialize();
 
         BorderPane root = new BorderPane();

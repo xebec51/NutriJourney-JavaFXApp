@@ -259,4 +259,42 @@ public class Database {
         }
         return foodLog;
     }
+
+    public static synchronized void updateFoodLog(String username, Food food, String date, String day) {
+        if (username == null || username.isEmpty() || food == null) {
+            throw new IllegalArgumentException("Username and food cannot be null or empty");
+        }
+        try (PreparedStatement pstmt = getConnection().prepareStatement(
+                "UPDATE food_log SET food_name = ?, calories = ?, protein = ?, fat = ?, carbs = ?, water = ? WHERE username = ? AND consumption_date = ? AND consumption_day = ?")) {
+            pstmt.setString(1, food.getName());
+            pstmt.setDouble(2, food.getCalories());
+            pstmt.setDouble(3, food.getProtein());
+            pstmt.setDouble(4, food.getFat());
+            pstmt.setDouble(5, food.getCarbs());
+            pstmt.setDouble(6, food.getWater());
+            pstmt.setString(7, username);
+            pstmt.setString(8, date);
+            pstmt.setString(9, day);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static synchronized void deleteFoodLog(String username, String foodName, String date, String day) {
+        if (username == null || username.isEmpty() || foodName == null || foodName.isEmpty() || date == null || date.isEmpty() || day == null || day.isEmpty()) {
+            throw new IllegalArgumentException("Parameters cannot be null or empty");
+        }
+        try (PreparedStatement pstmt = getConnection().prepareStatement(
+                "DELETE FROM food_log WHERE username = ? AND food_name = ? AND consumption_date = ? AND consumption_day = ?")) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, foodName);
+            pstmt.setString(3, date);
+            pstmt.setString(4, day);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
