@@ -262,8 +262,22 @@ public class MainController {
         Label fatLabel = new Label("Fat: " + food.getFat());
         Label carbsLabel = new Label("Carbs: " + food.getCarbs());
 
+        Button addButton = new Button("Add to Consumed");
+        addButton.setStyle("-fx-background-color: #006400; -fx-text-fill: #ffffff;");
+        addButton.setOnAction(e -> {
+            LocalDate today = LocalDate.now();
+            String date = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+            food.setDate(date);
+            food.setDay(time);
+            user.logFood(food, date, time);
+            updateTodayNutrients();
+            detailStage.close();
+            showAlert("Food Logged", food.getName() + " has been added to your consumed list.");
+        });
+
         Button editButton = new Button("Edit");
-        editButton.setStyle("-fx-background-color: #006400; -fx-text-fill: #ffffff;");
+        editButton.setStyle("-fx-background-color: #fda50f; -fx-text-fill: #ffffff;");
         editButton.setOnAction(e -> showEditFoodForm(food, detailStage));
 
         Button deleteButton = new Button("Delete");
@@ -275,9 +289,9 @@ public class MainController {
             detailStage.close();
         });
 
-        detailLayout.getChildren().addAll(foodNameLabel, caloriesLabel, proteinLabel, fatLabel, carbsLabel, editButton, deleteButton);
+        detailLayout.getChildren().addAll(foodNameLabel, caloriesLabel, proteinLabel, fatLabel, carbsLabel, addButton, editButton, deleteButton);
 
-        Scene detailScene = new Scene(detailLayout, 300, 200);
+        Scene detailScene = new Scene(detailLayout, 300, 300);
         detailStage.setScene(detailScene);
         detailStage.setTitle("Food Details");
         detailStage.show();
